@@ -36,6 +36,7 @@ PFAEDLE = docker run -i --rm -v $(HOST_MOUNT)/data/osm:$(TOOL_DATA)/osm -v $(HOS
 MERGE = docker run -v $(HOST_MOUNT)/data/gtfs:$(TOOL_DATA)/gtfs --rm mfdz/otp-data-tools java -Xmx18g -jar one-busaway-gtfs-merge/onebusaway-gtfs-merge-cli.jar --file=stops.txt --duplicateDetection=identity 
 GTFSVTOR = docker run -i --rm -v $(HOST_MOUNT)/data/gtfs:$(TOOL_DATA)/gtfs -v $(HOST_MOUNT)/data/www:$(TOOL_DATA)/www -e GTFSVTOR_OPTS=-Xmx8G mfdz/gtfsvtor
 GTFSTIDY = docker run -i --rm -v $(HOST_MOUNT)/data/gtfs:$(TOOL_DATA)/gtfs derhuerst/gtfstidy
+GEN_GTFS_FLEX = docker run -i --rm -v $(HOST_MOUNT)/data/gtfs:$(TOOL_DATA)/gtfs derhuerst/generate-herrenberg-gtfs-flex
 
 
 # Baden-Württemberg OSM extract
@@ -105,7 +106,7 @@ data/gtfs/%.merged.with_flex.gtfs: data/gtfs/%.merged.gtfs.zip
 	rm -rf $@
 	unzip -d $@ $<
 	$(info patching GTFS-Flex data into the GTFS feed)
-	docker run -i --rm -v $(HOST_MOUNT)/data/gtfs/$(@F):/gtfs derhuerst/generate-herrenberg-gtfs-flex
+	$(GEN_GTFS_FLEX) $(TOOL_DATA)/gtfs/$(@F)
 data/gtfs/%.merged.with_flex.gtfs.zip: data/gtfs/%.merged.with_flex.gtfs
 	rm -f $@
 	zip -j $@ $</*.txt $</locations.geojson
